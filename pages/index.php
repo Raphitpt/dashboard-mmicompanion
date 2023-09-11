@@ -49,6 +49,11 @@ $stmt = $dbh->prepare($color_subjects);
 $stmt->execute();
 $color_subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$sql_information = "SELECT informations.*, users.role FROM informations INNER JOIN users ON informations.id_user = users.id_user ORDER BY date DESC";
+$stmt_information = $dbh->prepare($sql_information);
+$stmt_information->execute();
+$informations = $stmt_information->fetchAll(PDO::FETCH_ASSOC);
+
 echo head('MMI Companion | Emploi du temps');
 ?>
 <style>
@@ -90,22 +95,110 @@ echo head('MMI Companion | Emploi du temps');
     <section class="section_agenda-index">
       <div class="title_trait">
         <h1>L'agenda</h1>
-        <div>
-          <?php
-          // if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
-          //   $activation_code = generate_activation_code();
-          //   send_activation_email($_POST['mail'], $activation_code);
-          // }
-          ?>
-          <form method="post">
-            <input type="text" name="mail">
-            <input type="submit" value="Envoyer" name="submit">
-          </form>
-        </div>
+        <div></div>
       </div>
+      <div class="select_but_agenda">
+          <select name="but" id="but">
+            <option value="BUT1">BUT1</option>
+            <option value="BUT2">BUT2</option>
+            <option value="BUT3">BUT3</option>
+          </select>
+          <select name="tp" id="tp">
+            <option value="TP1">TP1</option>
+            <option value="TP2">TP2</option>
+            <option value="TP3">TP3</option>
+            <option value="TP4">TP4</option>
+          </select>
+        </div>
+      <div class="agenda_content-agenda"></div>
 
 
     </section>
+    
+    <section class="main-outils">
+    <div class="title_trait">
+        <h1>Outils supplémentaires</h1>
+        <div></div>
+      </div>
+      <div style="height:30px"></div>
+    <div class="container-outils">
+            <a href="https://zimbra.univ-poitiers.fr" target="_blank">
+                <div class="item-outils red">
+                    <div class="item_flextop-outils">
+                        <h1>Messagerie
+                        <br>(webmail)
+                        </h1>
+                        <img src="./../assets/img/messagerie.webp" alt="Une personne envoyant un email">
+                    </div>
+                    <div class="item_flexbottom-outils">
+                        <p>Ta messagerie de l’université de Poitiers</p>
+                    </div>
+                </div>
+            </a>
+            <a href="https://cas.univ-poitiers.fr/cas/login?service=https://ent.univ-poitiers.fr/uPortal/Login" target="_blank">
+                <div class="item-outils purple">
+                    <div class="item_flextop-outils">
+                        <h1>ENT</h1>
+                        <img src="./../assets/img/ENT.webp" alt="Une personne qui travaille">
+                    </div>
+                    <div class="item_flexbottom-outils">
+                        <p>Ton espace numérique de travail</p>
+                    </div>
+                </div>
+            </a>
+            <a href="https://auth.univ-poitiers.fr/cas/login?service=https%3A%2F%2Fupdago.univ-poitiers.fr%2Flogin%2Findex.php%3FauthCAS%3DCAS" target="_blank">
+                <div class="item-outils orange">
+                    <div class="item_flextop-outils updago_img">
+                        <h1>UPdago</h1>
+                        <img src="./../assets/img/UPdago.webp" alt="Logo de UPdago">
+                    </div>
+                    <div class="item_flexbottom-outils">
+                        <p>Ta plateforme d’enseignement en ligne</p>
+                    </div>
+                </div>
+            </a>
+            
+        </div>
+    </section>
+    <section class="main-informations">
+        <div style="height:30px"></div>
+        <div class="title_trait">
+            <h1>Informations</h1>
+            <div></div>
+        </div>
+        <div style="height:20px"></div>
+        <div class="container-informations">
+            <?php foreach ($informations as $information) : 
+                $name_color = "";
+                if ($information['role'] == "eleve") {
+                    $name_color = "#FFB141";
+                } elseif ($information['role'] == "prof") {
+                    $name_color = "#5cceff";
+                } elseif ($information['role'] == "admin") {
+                    $name_color = "#6C757D";
+                }elseif ($information['role'] == "chef") {
+                        $name_color = "#6C757D";
+                } elseif (strpos($information['role'], 'BDE') !== false) {
+                    $name_color = "#bca5ff";
+                }
+                ?>
+                <div class="item-information">
+                    <div class="item_content_title-information">
+                        <div class="item_content_title_flexleft-information">
+                            <h2><?= $information['titre'] ?></h2>
+                            <p><?= $information['date'] ?></p>
+                        </div>
+                        <div class="item_content_title_flexright-information" style="background-color : <?php echo $name_color ?>">
+                            <p><?= $information['user'] ?></p>
+                        </div>
+                    </div>
+                    <div class="item_content_text-information">
+                        <p><?= $information['content'] ?></p>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+              </section>
 
   </main>
 
@@ -199,5 +292,38 @@ echo head('MMI Companion | Emploi du temps');
     calendar.render();
   });
 </script>
+<script>
+        const butSelect = document.getElementById('but');
+        const tpSelect = document.getElementById('tp');
+        const agendaMain = document.querySelector('.agenda_content-agenda');
+
+        // Fonction pour effectuer la requête XHR en utilisant POST
+        function loadAgenda() {
+            const selectedBut = butSelect.value;
+            const selectedTp = tpSelect.value;
+
+            let edu_group = selectedBut + '-' + selectedTp;
+
+            const xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // const response = JSON.parse();
+                    agendaMain.innerHTML = xhr.responseText;
+                }
+            };
+
+            // Préparez les données à envoyer en tant que paramètres POST
+            const data = new FormData();
+            data.append('edu_group', edu_group);
+
+            // Envoyer la requête POST vers agenda.php
+            xhr.open('POST', 'agenda_index.php', true);
+            xhr.send(data);
+        }
+
+        // Écouteurs d'événements pour les changements d'options
+        butSelect.addEventListener('change', loadAgenda);
+        tpSelect.addEventListener('change', loadAgenda);
+    </script>
 
 </html>

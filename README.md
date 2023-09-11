@@ -1,5 +1,5 @@
 
-# MMI Dahsboard
+# MMI Dashboard
 ![Logo](https://github.com/Raphitpt/mmicompanion/blob/930ad01e2a1fce41fba8680a29260efe61f56b1d/splash_screens/icon.png)
 
 C'est un projet pour alimenter notre portfolio. Ce projet à pour but d'améliorer l'organisation des étudiants du BUT MMI D'Angoulême. Ce site est une PWA (Progressive Web App) et est uniquement accessible en téléchargeant l'application.
